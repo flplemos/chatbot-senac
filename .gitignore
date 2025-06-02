@@ -1,0 +1,6 @@
+# Ignorar dependências e arquivos gerados
+node_modules/
+userdatas.json
+prints/
+.env
+session.json
