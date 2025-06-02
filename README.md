@@ -42,14 +42,14 @@ Oferecer um atendimento inicial automatizado para suporte técnico, focado em:
    git clone https://github.com/flplemos/chatbot-senac.git
    cd chatbot-senac
 2. Instale as dependências:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
 3. Execute o bot:
-```bash
-node chatbot.js
-```
+   ```bash
+   node chatbot.js
+   ```
 
 Leia o QR Code com o app do WhatsApp no seu celular.
 
