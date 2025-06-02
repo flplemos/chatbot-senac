@@ -1,4 +1,4 @@
 Comandos para iniciar o chatbot:
 
-npm install
+npm install <br>
 node chatbot.js
