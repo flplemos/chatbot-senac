@@ -62,4 +62,4 @@ O bot exibe uma mensagem automática informando que os dados dos usuários são 
 Projeto de uso interno/acadêmico no contexto do Senac-RN. Reutilização livre para fins educacionais.
 
 🙋‍♂️ Autor
-Desenvolvido por Felipe Lemos, estagiário no setor de Tecnologia Educacional do Senac-RN.
+Desenvolvido por Felipe Lemos e Rafael Moura, estagiários no setor de Tecnologia Educacional do Senac-RN.
