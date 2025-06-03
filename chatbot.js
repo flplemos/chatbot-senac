@@ -113,7 +113,8 @@ client.on('message', async msg => {
         user.step++;
 
         if (user.step >= passos.length) {
-            await client.sendMessage(chatId, 'Obrigado! Seu chamado foi registrado. Aguarde nosso contato.');
+            await client.sendMessage(chatId, 'Obrigado! Seu chamado foi registrado. Aguarde nosso contato.\n\n Para retornar ao menu digite: "Menu"');
+
 
             salvarChamado(user.opcao, user.respostas);
 
@@ -139,11 +140,11 @@ client.on('message', async msg => {
             `2 - Problemas com Microsoft Authenticator\n` +
             `3 - Consultar meu e-mail institucional\n` +
             `4 - Problema no portal do aluno\n` +
-            `5 - Nenhuma dessas opções`
+            `5 - Nenhuma dessas opções\n` 
         );
         await delay(3000);
         await chat.sendStateTyping();
-        await delay(5000);
+        await delay(3000);
         await client.sendMessage(msg.from,
             `Após o envio da mensagem, aguarde. Não reenvie mensagens ou realize ligações, pois alteram a sua vez na fila de espera.\n` +
             `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
@@ -158,6 +159,10 @@ client.on('message', async msg => {
         // Resposta direta para opção 3
         if (opcao === '3') {
             await client.sendMessage(chatId, 'Para consultar seu e-mail institucional, acesse o link abaixo e informe seu CPF:\n\n🔗 https://salavirtual.rn.senac.br/\n\nLá você verá qual é seu e-mail institucional.');
+            await delay(3000);
+            await chat.sendStateTyping();
+            await delay(3000);
+            await client.sendMessage(msg.from,'Para retornar ao Menu digite: "menu"')
             return;
         }
 
