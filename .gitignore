@@ -5,3 +5,4 @@ prints/
 .env
 session.json
 credentials/google-service-account.json
+.wwebjs_cache/
