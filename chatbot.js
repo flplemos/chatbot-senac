@@ -1,6 +1,7 @@
 const qrcode = require('qrcode-terminal');
 const { Client } = require('whatsapp-web.js');
 const fs = require('fs');
+const { adicionarLinha } = require('./sheets');
 const client = new Client();
 
 client.on('qr', qr => {
@@ -50,27 +51,50 @@ function valTextoSimples(text) { return text.trim().length > 0; }
 function valImagem(msg) { return msg.hasMedia; }
 
 // Função para salvar chamado em JSON
-function salvarChamado(opcao, respostas) {
-    const arquivo = './userdatas.json';
-    let dados = [];
+async function salvarChamado(opcao, respostas, chatId) {
+  const arquivo = './userdatas.json';
+  let dados = [];
 
-    if (fs.existsSync(arquivo)) {
-        const json = fs.readFileSync(arquivo);
-        dados = JSON.parse(json);
-    }
+  if (fs.existsSync(arquivo)) {
+    const json = fs.readFileSync(arquivo);
+    dados = JSON.parse(json);
+  }
 
-    const chamado = {
-        opcao,
-        respostas,
-        dataRegistro: new Date().toISOString()
-    };
+  const chamado = {
+    opcao,
+    respostas,
+    dataRegistro: new Date().toISOString()
+  };
 
-    dados.push(chamado);
+  dados.push(chamado);
+  fs.writeFileSync(arquivo, JSON.stringify(dados, null, 2));
 
-    fs.writeFileSync(arquivo, JSON.stringify(dados, null, 2));
+  // Formata os dados para a planilha
+  const linha = [
+    Date.now(),                // ID_Chamado
+    chatId,                    // ChatID_Usuario
+    respostas[0] || '',        // Nome_Completo
+    respostas[1] || '',        // CPF
+    respostas[2] || '',        // Email_Pessoal
+    respostas[3] || '',        // Email_Institucional
+    respostas[4] || '',        // Descricao_Problema ou Caminho_Print
+    respostas[4]?.startsWith('prints') ? respostas[4] : '', // Caminho_Print
+    new Date().toLocaleString('pt-BR'), // Data_Hora_Registro_Bot
+    'Em aberto',               // Status_Chamado
+    '', '', '', ''             // Atendente_Responsavel, Data_Hora_Finalizacao_Atendente,               Resolucao_Confirmada_Usuario, Nota_Atendimento
+  ];
+
+  try {
+    await adicionarLinha(linha);
+    console.log('Chamado registrado na planilha com sucesso!');
+  } catch (err) {
+    console.error('Erro ao enviar dados para a planilha:', err);
+  }
 }
 
+
 client.on('message', async msg => {
+    
     const chatId = msg.from;
 
     // Se usuário está no meio de um fluxo
@@ -116,7 +140,7 @@ client.on('message', async msg => {
             await client.sendMessage(chatId, 'Obrigado! Seu chamado foi registrado. Aguarde nosso contato.\n\n Para retornar ao menu digite: "Menu"');
 
 
-            salvarChamado(user.opcao, user.respostas);
+            await salvarChamado(user.opcao, user.respostas, chatId);
 
             delete usersData[chatId];
             return;
