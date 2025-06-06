@@ -1,65 +1,80 @@
 # 🤖 Chatbot SENAC-RN EduTech
 
-Este projeto é um chatbot desenvolvido durante estágio no setor de Tecnologia Educacional do **Senac-RN**, com o objetivo de **automatizar os atendimentos do suporte técnico via WhatsApp**, otimizando a triagem de solicitações e dúvidas dos usuários.
+Este projeto é um **chatbot automatizado para suporte técnico via WhatsApp**, desenvolvido durante estágio no setor de Tecnologia Educacional do **Senac-RN**. Seu objetivo é **agilizar o atendimento inicial** a alunos e colaboradores, triando demandas recorrentes relacionadas a acesso e sistemas institucionais.
+
+---
 
 ## 📌 Objetivo
 
-Oferecer um atendimento inicial automatizado para suporte técnico, focado em:
+Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
+
 - Recuperação de acesso a contas Microsoft
 - Problemas com Microsoft Authenticator
 - Consulta de e-mails institucionais
 - Problemas no portal do aluno
 - Dúvidas gerais
 
+---
+
 ## 🚀 Funcionalidades
 
-- Atendimento via **WhatsApp Web** usando `whatsapp-web.js`
+- Integração com **WhatsApp Web** via [`whatsapp-web.js`](https://github.com/pedroslopez/whatsapp-web.js)
 - Geração de QR Code para autenticação
-- Menu inicial com 5 opções de suporte
-- Coleta de informações como nome, CPF, e-mails e imagens
-- Validação de dados básicos (CPF, e-mail, imagem)
-- Armazenamento dos chamados em um arquivo JSON (`userdatas.json`)
-- Armazenamento de imagens recebidas em uma pasta local
+- Menu de suporte com opções automatizadas
+- Coleta e validação de informações (nome, CPF, e-mails, imagens)
+- Armazenamento dos chamados localmente (`userdatas.json`)
+- Suporte à integração com **Google Sheets** (via API)
+- Definição de **agenda de plantão** com redirecionamento de atendimentos
+- Congelamento/liberação de chats por atendentes via comandos no grupo de suporte
+
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- [Node.js](https://nodejs.org/)
-- [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)
-- [qrcode-terminal](https://www.npmjs.com/package/qrcode-terminal)
-- `fs` para manipulação de arquivos
-- `moment-timezone` (embora não utilizado no código atual, está no package)
+- Node.js
+- whatsapp-web.js
+- qrcode-terminal
+- fs (sistema de arquivos)
+- googleapis (API do Google Sheets)
+- moment-timezone
+
+---
 
 ## 📂 Estrutura dos Arquivos
 
 - `chatbot.js`: arquivo principal do bot
-- `userdatas.json`: armazenamento dos chamados abertos
-- `prints/`: pasta onde são salvas imagens enviadas pelos usuários
+- `handleMessage.js`: controle da lógica de atendimento
+- `fluxos.js`: define os fluxos de perguntas por opção de suporte
+- `validacoes.js`: validação de dados do usuário
+- `agendaSuporte.js`: controle dos plantonistas por horário
+- `salvarChamado.js`: salva o chamado localmente e no Google Sheets
+- `userdatas.json`: armazenamento local de chamados
+- `prints/`: pasta onde são salvas as imagens enviadas
 
-## 💻 Como Usar
+---
 
-1. **Clone o repositório**:
-   ```bash
-   git clone https://github.com/flplemos/chatbot-senac.git
-   cd chatbot-senac
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+## ⚠️ Requisitos e Avisos
 
-3. Execute o bot:
-   ```bash
-   node chatbot.js
-   ```
+> ⚠️ **Este projeto não está pronto para execução direta fora do ambiente interno.**
 
-Leia o QR Code com o app do WhatsApp no seu celular.
+- A integração com Google Sheets requer um arquivo de credenciais (`credentials/google-service-account.json`), que **não está incluído no repositório** por questões de segurança.
+- O ID do grupo de suporte (`ID_GRUPO_SUPORTE`) e os IDs dos atendentes também precisam ser configurados manualmente.
+- O bot só funcionará se for escaneado por uma conta do WhatsApp ativa, com permissão para atuar no grupo de suporte.
 
-O bot responderá automaticamente com um menu assim que o usuário enviar "menu", "oi", "olá" etc.
+---
 
-🔐 LGPD
-O bot exibe uma mensagem automática informando que os dados dos usuários são tratados conforme a Lei Geral de Proteção de Dados (LGPD - Lei n° 13.709/2018).
+## 🔐 LGPD
 
-📄 Licença
-Projeto de uso interno/acadêmico no contexto do Senac-RN. Reutilização livre para fins educacionais.
+O bot exibe uma mensagem automática informando que os dados dos usuários são tratados conforme a **Lei Geral de Proteção de Dados (LGPD - Lei n° 13.709/2018)**.
 
-🙋‍♂️ Autor
-Desenvolvido por Felipe Lemos e Rafael Moura, estagiários no setor de Tecnologia Educacional do Senac-RN.
+---
+
+## 📄 Licença
+
+Projeto de uso interno/acadêmico no contexto do **Senac-RN**. Reutilização permitida para fins educacionais.
+
+---
+
+## 🙋‍♂️ Autoria
+
+Desenvolvido por **Felipe Lemos** e **Rafael Moura**, estagiários no setor de Tecnologia Educacional do **Senac-RN**.
