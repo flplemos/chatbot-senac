@@ -24,10 +24,8 @@ const fluxos = {
     '4': [
         { pergunta: 'Informe seu nome completo:', valida: valNome },
         { pergunta: 'Descreva o problema no portal do aluno:', valida: valTextoSimples }
-    ],
-    '5': [
-        { pergunta: 'Por favor, descreva sua dúvida ou questão:', valida: valTextoSimples }
     ]
+    // O fluxo para a opção '5' foi removido, pois agora ela tem uma resposta direta em handleMessage.js
 };
 
 module.exports = fluxos;
