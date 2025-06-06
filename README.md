@@ -75,6 +75,21 @@ Projeto de uso interno/acadêmico no contexto do **Senac-RN**. Reutilização pe
 
 ---
 
-## 🙋‍♂️ Autoria
+## 🙋‍♂️ Autoria e Contribuições
 
-Desenvolvido por **Felipe Lemos** e **Rafael Moura**, estagiários no setor de Tecnologia Educacional do **Senac-RN**.
+Este projeto foi idealizado e desenvolvido por **Felipe Lemos**, responsável por:
+
+- Toda a estrutura funcional do chatbot (fluxos, validações, armazenamento)
+- Organização modular e lógica de controle de estado por usuário
+- Integração com WhatsApp Web e Google Sheets
+- Mecanismos de controle por horário, plantonistas e comandos administrativos
+- Persistência de dados local e registro de imagens enviadas pelo usuário
+- Implementação da agenda de plantonistas e validações personalizadas
+- Lógica de resposta automática inteligente e mensagens conforme a LGPD
+- Estruturação de código limpa e preparada para manutenção/escalabilidade futura
+
+**Rafael Moura** contribuiu com:
+- A função de verificação de horário útil (`dentroDoHorario`)
+- Um fluxo adicional de atendimento (opção 6), sem integração com operadores
+
+Projeto desenvolvido no contexto de estágio no setor de Tecnologia Educacional do Senac-RN.
