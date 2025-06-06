@@ -1,7 +1,8 @@
 const qrcode = require('qrcode-terminal');
 const { Client } = require('whatsapp-web.js');
-const handleMessage = require('./handleMessage'); // importa o controlador
-const usersData = {}; // controle de fluxo dos usuários
+const handleMessage = require('./handleMessage');
+const usersData = {};
+const chatsCongelados = new Set();
 
 const client = new Client();
 
@@ -14,7 +15,7 @@ client.on('ready', () => {
 });
 
 client.on('message', async msg => {
-    await handleMessage(msg, client, usersData);
+    await handleMessage(msg, client, usersData, chatsCongelados);
 });
 
 client.initialize();
