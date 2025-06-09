@@ -37,7 +37,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     //  NOVO: LÓGICA DE COMANDO PARA DESCONGELAR (USO DOS ATENDENTES)
     // =================================================================
     if (msg.from === ID_GRUPO_SUPORTE) {
-        
+
         // --- Comando para LIBERAR o bot ---
         if (msg.body.toLowerCase().startsWith('!liberarbot ')) {
             const numeroAlvo = msg.body.split(' ')[1];
@@ -71,7 +71,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
             }
             return; // Encerra a função após processar o comando
         }
-        
+
         // Se a mensagem no grupo não for um comando, simplesmente ignora.
         return;
     }
@@ -187,10 +187,10 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
                         `Atenção, @${atendente.id.replace('@c.us', '')}! Por favor, assuma o atendimento.\n\n` +
                         `*‼️ Bot nesta conversa está congelado.*`;
 
-                    const contatoAtendente = await client.getContactById(atendente.id);
                     await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
-                        mentions: [contatoAtendente]
+                        mentions: [atendente.id]
                     });
+
 
                     // Congela o chat adicionando na lista
                     chatsCongelados.add(chatId);
