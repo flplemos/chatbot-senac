@@ -37,19 +37,43 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     //  NOVO: LÓGICA DE COMANDO PARA DESCONGELAR (USO DOS ATENDENTES)
     // =================================================================
     if (msg.from === ID_GRUPO_SUPORTE) {
-        // Verifica se a mensagem é um comando para liberar o bot
+        
+        // --- Comando para LIBERAR o bot ---
         if (msg.body.toLowerCase().startsWith('!liberarbot ')) {
-            const numeroParaLiberar = msg.body.split(' ')[1];
-            const chatIdParaLiberar = `${numeroParaLiberar}@c.us`;
-
-            if (chatsCongelados.has(chatIdParaLiberar)) {
-                chatsCongelados.delete(chatIdParaLiberar);
-                await client.sendMessage(ID_GRUPO_SUPORTE, `✅ Bot liberado para o usuário ${numeroParaLiberar}.`);
-            } else {
-                await client.sendMessage(ID_GRUPO_SUPORTE, `⚠️ O bot já estava ativo para o usuário ${numeroParaLiberar}.`);
+            const numeroAlvo = msg.body.split(' ')[1];
+            if (!numeroAlvo) {
+                return await client.sendMessage(ID_GRUPO_SUPORTE, '⚠️ Formato incorreto. Use: !liberarbot <numero_do_usuario>');
             }
+            const chatIdAlvo = `${numeroAlvo}@c.us`;
+
+            if (chatsCongelados.has(chatIdAlvo)) {
+                chatsCongelados.delete(chatIdAlvo);
+                await client.sendMessage(ID_GRUPO_SUPORTE, `✅ Bot liberado para o usuário ${numeroAlvo}.`);
+            } else {
+                await client.sendMessage(ID_GRUPO_SUPORTE, `⚠️ O bot já estava ativo para o usuário ${numeroAlvo}.`);
+            }
+            return; // Encerra a função após processar o comando
         }
-        return; // Ignora outras mensagens do grupo
+
+        // --- NOVO: Comando para CONGELAR o bot ---
+        if (msg.body.toLowerCase().startsWith('!congelarbot ')) {
+            const numeroAlvo = msg.body.split(' ')[1];
+            if (!numeroAlvo) {
+                return await client.sendMessage(ID_GRUPO_SUPORTE, '⚠️ Formato incorreto. Use: !congelarbot <numero_do_usuario>');
+            }
+            const chatIdAlvo = `${numeroAlvo}@c.us`;
+
+            if (chatsCongelados.has(chatIdAlvo)) {
+                await client.sendMessage(ID_GRUPO_SUPORTE, `⚠️ O bot já estava congelado para o usuário ${numeroAlvo}.`);
+            } else {
+                chatsCongelados.add(chatIdAlvo);
+                await client.sendMessage(ID_GRUPO_SUPORTE, `✅ Bot congelado para o usuário ${numeroAlvo}. O bot não responderá mais a este usuário até ser liberado.`);
+            }
+            return; // Encerra a função após processar o comando
+        }
+        
+        // Se a mensagem no grupo não for um comando, simplesmente ignora.
+        return;
     }
 
     // =================================================================
@@ -59,7 +83,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
         return; // Se o chat está na lista, o bot não faz nada.
     }
 
-    // --- O restante do código continua daqui para baixo ---
 
     if (usersData[chatId]) {
         const user = usersData[chatId];
