@@ -1,6 +1,6 @@
 # 🤖 Chatbot SENAC-RN EduTech
 
-Este projeto é um **chatbot automatizado para suporte técnico via WhatsApp**, desenvolvido durante estágio no setor de Tecnologia Educacional do **Senac-RN**. Seu objetivo é **agilizar o atendimento inicial** a alunos e colaboradores, triando demandas recorrentes relacionadas a acesso e sistemas institucionais.
+Este projeto é um **chatbot automatizado para suporte técnico via WhatsApp**, desenvolvido durante estágio no setor de Tecnologia Educacional do **Senac-RN**. Seu objetivo é **agilizar o atendimento inicial** a alunos e colaboradores, triando demandas recorrentes e registrando chamados de forma inteligente e organizada.
 
 ---
 
@@ -18,14 +18,12 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
 
 ## 🚀 Funcionalidades
 
-- Integração com **WhatsApp Web** via [`whatsapp-web.js`](https://github.com/pedroslopez/whatsapp-web.js)
-- Geração de QR Code para autenticação
-- Menu de suporte com opções automatizadas
-- Coleta e validação de informações (nome, CPF, e-mails, imagens)
-- Armazenamento dos chamados localmente (`userdatas.json`)
-- Suporte à integração com **Google Sheets** (via API)
-- Definição de **agenda de plantão** com redirecionamento de atendimentos
-- Congelamento/liberação de chats por atendentes via comandos no grupo de suporte
+- **Integração com WhatsApp Web:** Utiliza a biblioteca [`whatsapp-web.js`](https://github.com/pedroslopez/whatsapp-web.js) para comunicação.
+- **Fluxos de Atendimento Automatizados:** Menu interativo para guiar o usuário na resolução de problemas comuns e na abertura de chamados.
+- **Integração com Google Drive:** Envia os prints de erros diretamente para uma pasta no Google Drive e anexa o link compartilhável ao chamado, garantindo acesso fácil para a equipe de suporte.
+- **Registro de Chamados no Google Sheets:** Salva todos os detalhes do chamado em tempo real em uma planilha Google Sheets, que serve como um sistema de tickets.
+- **Formatação Avançada da Planilha:** Utiliza Google Apps Script para formatar a planilha de chamados automaticamente, incluindo cabeçalhos estilizados, cores de linha alternadas e botões de status interativos e coloridos.
+- **Gestão de Atendimento Humano:** Possui agenda de plantão para direcionar o usuário ao atendente correto e permite "congelar" a automação para que um humano possa assumir a conversa.
 
 ---
 
@@ -33,23 +31,25 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
 
 - Node.js
 - whatsapp-web.js
+- googleapis (API do Google Sheets e Google Drive)
 - qrcode-terminal
-- fs (sistema de arquivos)
-- googleapis (API do Google Sheets)
+- Google Apps Script
 - moment-timezone
 
 ---
 
 ## 📂 Estrutura dos Arquivos
 
-- `chatbot.js`: arquivo principal do bot
-- `handleMessage.js`: controle da lógica de atendimento
-- `fluxos.js`: define os fluxos de perguntas por opção de suporte
-- `validacoes.js`: validação de dados do usuário
-- `agendaSuporte.js`: controle dos plantonistas por horário
-- `salvarChamado.js`: salva o chamado localmente e no Google Sheets
-- `userdatas.json`: armazenamento local de chamados
-- `prints/`: pasta onde são salvas as imagens enviadas
+- `chatbot.js`: arquivo principal do bot.
+- `handleMessage.js`: controle da lógica de atendimento.
+- `fluxos.js`: define os fluxos de perguntas por opção de suporte.
+- `validacoes.js`: validação de dados do usuário.
+- `agendaSuporte.js`: controle dos plantonistas por horário.
+- `salvarChamado.js`: salva o chamado localmente e envia para o Google Sheets.
+- `userdatas.json`: armazenamento local de chamados.
+- `sheets.js`: Módulo que lida com a comunicação com a API do Google Sheets.
+- `drive.js`: Módulo responsável por fazer o upload de imagens para o Google Drive.
+- `prints/`: Pasta anteriormente usada para salvar imagens localmente, agora substituída pela integração com Google Drive.
 
 ---
 
@@ -57,9 +57,9 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
 
 > ⚠️ **Este projeto não está pronto para execução direta fora do ambiente interno.**
 
-- A integração com Google Sheets requer um arquivo de credenciais (`credentials/google-service-account.json`), que **não está incluído no repositório** por questões de segurança.
-- O ID do grupo de suporte (`ID_GRUPO_SUPORTE`) e os IDs dos atendentes também precisam ser configurados manualmente.
-- O bot só funcionará se for escaneado por uma conta do WhatsApp ativa, com permissão para atuar no grupo de suporte.
+- A integração com as APIs do Google requer um arquivo de credenciais (`credentials/google-service-account.json`), que **não está incluído no repositório**. A conta de serviço precisa de permissão nas APIs do Google Sheets e Google Drive.
+- O ID do grupo de suporte, os IDs dos atendentes e o ID da pasta do Google Drive precisam ser configurados manualmente nos arquivos de código.
+- O bot só funcionará se for escaneado por uma conta do WhatsApp ativa.
 
 ---
 
@@ -82,6 +82,8 @@ Este projeto foi idealizado e desenvolvido por **Felipe Lemos**, responsável po
 - Toda a estrutura funcional do chatbot (fluxos, validações, armazenamento)
 - Organização modular e lógica de controle de estado por usuário
 - Integração com WhatsApp Web e Google Sheets
+- Integração com Google Drive para upload de imagens
+- Implementação de Google Apps Script para formatação avançada da planilha
 - Mecanismos de controle por horário, plantonistas e comandos administrativos
 - Persistência de dados local e registro de imagens enviadas pelo usuário
 - Implementação da agenda de plantonistas e validações personalizadas
