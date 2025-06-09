@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { adicionarLinha } = require('./sheets');
-const ID_GRUPO_SUPORTE = '12036304...xxxxxxxx@g.us'; // Adicione o ID do grupo aqui
+const ID_GRUPO_SUPORTE = 'XXXXXXXX@g.us'; // Adicione o ID do grupo aqui
 
 // Modifique a assinatura da função para receber o 'client'
 async function salvarChamado(opcao, respostas, chatId, client) { 

@@ -1,8 +1,8 @@
 // agendaSuporte.js
 const atendentes = {
-  manha: { nome: 'NOME_ATENDENTE_MANHA', id: '55849xxxxxxxx@c.us' },
-  tarde: { nome: 'NOME_ATENDENTE_TARDE', id: '55849yyyyyyyy@c.us' },
-  noite: { nome: 'NOME_ATENDENTE_NOITE', id: '55849zzzzzzzz@c.us' },
+  manha: { nome: 'Atendente1', id: '5584xxxxxxxx@c.us' },
+  tarde: { nome: 'Atendente2', id: '5584xxxxxxxx@c.us' },
+  noite: { nome: 'Atendente3', id: '5584xxxxxxxx@c.us' },
 };
 
 const agenda = [];
