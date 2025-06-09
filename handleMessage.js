@@ -157,12 +157,11 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
         const opcao = msg.body;
 
         if (opcao === '3' || opcao === '5') {
-            // ... (código das opções 3 e 5 inalterado) ...
             if (opcao === '3') {
                 await client.sendMessage(chatId, 'Para consultar seu e-mail institucional, acesse o link abaixo e informe seu CPF:\n\n🔗 https://salavirtual.rn.senac.br/\n\nLá você verá qual é seu e-mail institucional.');
             }
             if (opcao === '5') {
-                await client.sendMessage(chatId, 'Informações sobre matrículas e cursos do SENAC-RN você pode entrar em contato com a central de atendimento: (84) 4005-1000 ou pelo site: Senac RN - CURSOS.');
+                await client.sendMessage(chatId, 'Informações sobre matrículas e cursos do SENAC-RN você pode entrar em contato com a central de atendimento: (84) 4005-1000 ou pelo site: 🔗 https://www.rn.senac.br/todos-os-cursos');
             }
             await delay(3000);
             await client.sendMessage(msg.from, 'Para retornar ao Menu digite: "menu"');
