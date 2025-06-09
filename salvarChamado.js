@@ -19,15 +19,18 @@ async function salvarChamado(opcao, respostas, chatId) {
   dados.push(chamado);
   fs.writeFileSync(arquivo, JSON.stringify(dados, null, 2));
 
+  const descricaoProblema = respostas[4]?.startsWith('http') ? '' : respostas[4] || '';
+  const linkImagem = respostas[4]?.startsWith('http') ? respostas[4] : '';
+
   const linha = [
-    Date.now(), // ID_Chamado
-    chatId,     // ChatID_Usuario
-    respostas[0] || '',
-    respostas[1] || '',
-    respostas[2] || '',
-    respostas[3] || '',
-    respostas[4]?.startsWith('prints') ? '' : respostas[4] || '',
-    respostas[4]?.startsWith('prints') ? respostas[4] : '',
+    Date.now(),       // ID_Chamado
+    chatId,           // ChatID_Usuario
+    respostas[0] || '', // Nome
+    respostas[1] || '', // CPF
+    respostas[2] || '', // Email Pessoal
+    respostas[3] || '', // Email Institucional
+    descricaoProblema,  // Descrição (se não for link)
+    linkImagem,         // Link da Imagem (se for link)
     new Date().toLocaleString('pt-BR'),
     'Em aberto',
     '', '', '', ''

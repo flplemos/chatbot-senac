@@ -1,4 +1,4 @@
-// handleMessage.js
+const { uploadImagem } = require('./drive')
 
 const fluxos = require('./fluxos');
 const salvarChamado = require('./salvarChamado');
@@ -75,21 +75,23 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
             await client.sendMessage(chatId, `Entrada inválida! ${passos[passoAtual].pergunta}`);
             return;
         }
+
+
         if ((user.opcao === '1' || user.opcao === '2') && passoAtual === 4) {
             const media = await msg.downloadMedia();
-            const base64Data = media.data;
-            const mimeType = media.mimetype;
-            const extension = mimeType.split('/')[1];
-            const fileName = `prints/${chatId}_${Date.now()}.${extension}`;
-            const fs = require('fs');
-            if (!fs.existsSync('prints')) {
-                fs.mkdirSync('prints');
-            }
-            fs.writeFileSync(fileName, Buffer.from(base64Data, 'base64'));
-            user.respostas[passoAtual] = fileName;
+            const fileName = `${chatId}_${Date.now()}.jpeg`; // Nome do arquivo
+
+            // Chama a função de upload e aguarda o link
+            const imageUrl = await uploadImagem(media.data, media.mimetype, fileName);
+
+            // Salva o link do Google Drive em vez do caminho local
+            user.respostas[passoAtual] = imageUrl;
+
         } else {
             user.respostas[passoAtual] = msg.body.trim();
         }
+
+
         user.step++;
         if (user.step >= passos.length) {
             await client.sendMessage(chatId, 'Obrigado! Seu chamado foi registrado. Aguarde nosso contato.\n\nPara retornar ao menu digite: "Menu"');
@@ -137,7 +139,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
                 await client.sendMessage(chatId, 'Para consultar seu e-mail institucional, acesse o link abaixo e informe seu CPF:\n\n🔗 https://salavirtual.rn.senac.br/\n\nLá você verá qual é seu e-mail institucional.');
             }
             if (opcao === '5') {
-                 await client.sendMessage(chatId, 'Informações sobre matrículas e cursos do SENAC-RN você pode entrar em contato com a central de atendimento: (84) 4005-1000 ou pelo site: Senac RN - CURSOS.');
+                await client.sendMessage(chatId, 'Informações sobre matrículas e cursos do SENAC-RN você pode entrar em contato com a central de atendimento: (84) 4005-1000 ou pelo site: Senac RN - CURSOS.');
             }
             await delay(3000);
             await client.sendMessage(msg.from, 'Para retornar ao Menu digite: "menu"');
@@ -157,11 +159,11 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
 
                     // Mensagem para o grupo atualizada
                     const msgParaGrupo = `*Novo chamado para atendimento humano!*\n\n` +
-                                       `*Solicitante:* ${nomeUsuario}\n` +
-                                       `*Contato:* ${numeroUsuario}\n\n` +
-                                       `Atenção, @${atendente.id.replace('@c.us', '')}! Por favor, assuma o atendimento.\n\n` +
-                                       `*‼️ Bot nesta conversa está congelado.*`;
-                    
+                        `*Solicitante:* ${nomeUsuario}\n` +
+                        `*Contato:* ${numeroUsuario}\n\n` +
+                        `Atenção, @${atendente.id.replace('@c.us', '')}! Por favor, assuma o atendimento.\n\n` +
+                        `*‼️ Bot nesta conversa está congelado.*`;
+
                     const contatoAtendente = await client.getContactById(atendente.id);
                     await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
                         mentions: [contatoAtendente]
