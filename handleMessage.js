@@ -118,7 +118,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
         user.step++;
         if (user.step >= passos.length) {
             await client.sendMessage(chatId, 'Obrigado! Seu chamado foi registrado. Aguarde nosso contato.\n\nPara retornar ao menu digite: "Menu"');
-            await salvarChamado(user.opcao, user.respostas, chatId);
+            await salvarChamado(user.opcao, user.respostas, chatId, client);
             delete usersData[chatId];
             return;
         }
