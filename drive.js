@@ -10,7 +10,7 @@ const auth = new google.auth.GoogleAuth({
 });
 
 // Cole o ID da pasta que você copiou do Google Drive
-const PASTA_ID = process.env.ID_PASTA_DRIVE;;
+const PASTA_ID = process.env.ID_PASTA_DRIVE;
 
 /**
  * Faz o upload de uma imagem para o Google Drive e retorna o link compartilhável.
