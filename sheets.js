@@ -7,7 +7,7 @@ const auth = new google.auth.GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-const spreadsheetId = '1UsDaM-RhqH_WTf7oBjcTp1mZmvAtes-PVO7YIgD4uwY';
+const spreadsheetId = process.env.ID_PLANILHA;
 
 async function adicionarLinha(dados) {
   const client = await auth.getClient();

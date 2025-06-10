@@ -7,7 +7,7 @@ const { valImagem } = require("./validacoes");
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-const ID_GRUPO_SUPORTE = "120363140070487039@g.us"; // <-- LEMBRE-SE DE SUBSTITUIR
+const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE; // <-- LEMBRE-SE DE SUBSTITUIR
 
 function dentroDoHorario() {
   const agora = new Date();
