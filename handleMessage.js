@@ -232,7 +232,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
               "@c.us",
               ""
             )}! Por favor, assuma o atendimento.\n\n` +
-            `*‼️ Bot nesta conversa está congelado.*\n\n`
+            `*‼️ Bot nesta conversa está congelado.*\n\n` +
             `🧊 Para liberar depois, envie: *!liberarbot ${numeroUsuario}*`;
 
           await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
