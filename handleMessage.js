@@ -175,7 +175,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
         `5 - Dúvidas sobre cursos e matrículas\n` +
         `6 - Falar com o suporte humano\n`
     );
-    await delay(3000);
     await chat.sendStateTyping();
     await delay(3000);
     await client.sendMessage(
@@ -233,7 +232,8 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
               "@c.us",
               ""
             )}! Por favor, assuma o atendimento.\n\n` +
-            `*‼️ Bot nesta conversa está congelado.*`;
+            `*‼️ Bot nesta conversa está congelado.*\n\n`
+            `🧊 Para liberar depois, envie: *!liberarbot ${numeroUsuario}*`;
 
           await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
             mentions: [atendente.id],
