@@ -7,7 +7,7 @@ const { valImagem } = require("./validacoes");
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE; // <-- LEMBRE-SE DE SUBSTITUIR
+const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE; 
 
 function dentroDoHorario() {
   const agora = new Date();
@@ -34,14 +34,9 @@ function getAtendenteDaVez() {
 async function handleMessage(msg, client, usersData, chatsCongelados) {
   const chatId = msg.from;
 
-  // =================================================================
-  //  NOVO: LÓGICA DE COMANDO PARA DESCONGELAR (USO DOS ATENDENTES)
-  // =================================================================
   if (msg.from === ID_GRUPO_SUPORTE) {
-    // --- Comando para LIBERAR o bot ---
     if (msg.body.toLowerCase().startsWith("!liberarbot ")) {
       const partes = msg.body.split(" ");
-      // Pega a segunda parte do comando e remove espaços/quebras de linha
       const numeroAlvo = partes[1] ? partes[1].trim() : null;
 
       if (!numeroAlvo) {
@@ -59,7 +54,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
           `✅ Bot liberado para o usuário ${numeroAlvo}.`
         );
       } else {
-        // Para depuração, pode ser útil verificar os valores aqui
         console.log(`Falha ao liberar. ID buscado: ${chatIdAlvo}`);
         console.log("IDs congelados no momento:", Array.from(chatsCongelados));
         await client.sendMessage(
@@ -70,7 +64,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       return;
     }
 
-    // --- NOVO: Comando para CONGELAR o bot ---
     if (msg.body.toLowerCase().startsWith("!congelarbot ")) {
       const numeroAlvo = msg.body.split(" ")[1];
       if (!numeroAlvo) {
@@ -93,30 +86,39 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
           `✅ Bot congelado para o usuário ${numeroAlvo}. O bot não responderá mais a este usuário até ser liberado.`
         );
       }
-      return; // Encerra a função após processar o comando
+      return;
     }
 
-    // Se a mensagem no grupo não for um comando, simplesmente ignora.
     return;
   }
 
-  // =================================================================
-  //  NOVO: VERIFICA SE O CHAT ESTÁ CONGELADO E IGNORA A MENSAGEM
-  // =================================================================
   if (chatsCongelados.has(chatId)) {
-    return; // Se o chat está na lista, o bot não faz nada.
+    return;
   }
 
   if (usersData[chatId]) {
     const user = usersData[chatId];
     const passos = fluxos[user.opcao];
     const passoAtual = user.step;
+
+    // =================================================================
+    //  CORREÇÃO APLICADA AQUI
+    //  Verifica se o fluxo já terminou ANTES de tentar validar.
+    // =================================================================
+    if (passoAtual >= passos.length) {
+        // Se por algum motivo a função for chamada para um passo que não existe,
+        // apenas limpa o estado do usuário e encerra.
+        delete usersData[chatId];
+        return;
+    }
+
     let valido = false;
     if ((user.opcao === "1" || user.opcao === "2") && passoAtual === 4) {
       valido = valImagem(msg);
     } else {
       valido = passos[passoAtual].valida(msg.body || "");
     }
+    
     if (!valido) {
       await client.sendMessage(
         chatId,
@@ -127,12 +129,8 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
 
     if ((user.opcao === "1" || user.opcao === "2") && passoAtual === 4) {
       const media = await msg.downloadMedia();
-      const fileName = `${chatId}_${Date.now()}.jpeg`; // Nome do arquivo
-
-      // Chama a função de upload e aguarda o link
+      const fileName = `${chatId}_${Date.now()}.jpeg`;
       const imageUrl = await uploadImagem(media.data, media.mimetype, fileName);
-
-      // Salva o link do Google Drive em vez do caminho local
       user.respostas[passoAtual] = imageUrl;
     } else {
       user.respostas[passoAtual] = msg.body.trim();
@@ -156,7 +154,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     msg.body.match(/(menu|Menu|oi|Oi|Olá|olá|boa|Boa)/i) &&
     msg.from.endsWith("@c.us")
   ) {
-    // ... (código do menu inicial inalterado) ...
     const chat = await msg.getChat();
     await delay(3000);
     await chat.sendStateTyping();
@@ -212,9 +209,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       return;
     }
 
-    // =================================================================
-    //  ALTERADO: LÓGICA DA OPÇÃO 6 PARA CONGELAR O CHAT
-    // =================================================================
     if (opcao === "6") {
       if (dentroDoHorario()) {
         const atendente = getAtendenteDaVez();
@@ -223,7 +217,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
           const nomeUsuario = contatoUsuario.pushname || msg.from;
           const numeroUsuario = msg.from.replace("@c.us", "");
 
-          // Mensagem para o grupo atualizada
           const msgParaGrupo =
             `*Novo chamado para atendimento humano!*\n\n` +
             `*Solicitante:* ${nomeUsuario}\n` +
@@ -239,7 +232,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
             mentions: [atendente.id],
           });
 
-          // Congela o chat adicionando na lista
           chatsCongelados.add(chatId);
 
           await client.sendMessage(
