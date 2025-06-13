@@ -31,7 +31,7 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
 ## 🛠️ Tecnologias Utilizadas
 
   - Node.js
-  - **MongoDB**
+  - MongoDB
   - whatsapp-web.js
   - googleapis (API do Google Sheets e Google Drive)
   - qrcode-terminal
