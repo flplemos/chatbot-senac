@@ -19,21 +19,40 @@ async function salvarChamado(opcao, respostas, chatId, client) {
     status: 'Em aberto' // Adicionando um status inicial
   };
 
-  // Prepara a linha para o Google Sheets (lógica original mantida)
-  // No salvarChamado.js
-  const linhaSheets = [
-    Date.now(),
-    chatId,
-    respostas[0] || '', // Nome
-    respostas[1] || '', // CPF
-    respostas[2] || '', // Email Pessoal
-    respostas[3] || '', // Email Institucional
-    respostas[4] || '', // <--- NOVA POSIÇÃO: Descrição do Problema
-    respostas[5]?.startsWith('http') ? respostas[5] : '', // <--- NOVA POSIÇÃO: URL da Imagem (se for uma URL)
-    new Date().toLocaleString('pt-BR'),
-    'Em aberto',
-    '', '', '', ''
-  ];
+  // Prepara a linha para o Google Sheets
+  let linhaSheets = [];
+
+  // Lógica condicional para montar linhaSheets com base na opção
+  if (opcao === '4') {
+    linhaSheets = [
+      Date.now(),
+      chatId,
+      respostas[0] || '', // Coluna C: Nome Completo
+      respostas[1] || '', // Coluna D: CPF
+      respostas[2] || '', // Coluna E: Email Pessoal
+      '',                 // Coluna F: Email Institucional (Vazio, pois não é coletado neste fluxo)
+      respostas[3] || '', // Coluna G: Descrição do Problema
+      respostas[4]?.startsWith('http') ? respostas[4] : '', // Coluna H: Print/Foto Erro
+      new Date().toLocaleString('pt-BR'),
+      'Em aberto',
+      '', '', '', ''
+    ];
+  } else {
+    // Para as demais opções (1, 2, etc.), usa a lógica padrão
+    linhaSheets = [
+      Date.now(),
+      chatId,
+      respostas[0] || '', // Nome
+      respostas[1] || '', // CPF
+      respostas[2] || '', // Email Pessoal
+      respostas[3] || '', // Email Institucional
+      respostas[4] || '', // Descrição do Problema
+      respostas[5]?.startsWith('http') ? respostas[5] : '', // URL da Imagem (se for uma URL)
+      new Date().toLocaleString('pt-BR'),
+      'Em aberto',
+      '', '', '', ''
+    ];
+  }
 
   // 3. Conexão e inserção no MongoDB
   const mongoClient = new MongoClient(MONGO_URI); // Cria um novo cliente
