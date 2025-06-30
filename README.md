@@ -24,7 +24,7 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
   - **Integração com Google Drive:** Envia os prints de erros diretamente para uma pasta no Google Drive e anexa o link compartilhável ao chamado, garantindo acesso fácil para a equipe de suporte.
   - **Formatação Avançada da Planilha:** Utiliza Google Apps Script para formatar a planilha de chamados automaticamente, incluindo cabeçalhos estilizados, cores de linha alternadas e botões de status interativos e coloridos.
   - **Gestão de Atendimento Humano:** Possui agenda de plantão para direcionar o usuário ao atendente correto e permite "congelar" a automação para que um humano possa assumir a conversa.
-  - **Correção de Bugs:** Resolvido o problema que interrompia o fluxo de conversa após o envio de uma imagem pelo usuário.
+  - **Coleta Detalhada de Descrição do Problema:** Permite que os usuários forneçam uma descrição textual detalhada do problema em fluxos específicos (Opções 1 e 2), aprimorando a triagem e o atendimento do suporte humano.
 
 -----
 
@@ -52,6 +52,14 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
   - `sheets.js`: Módulo que lida com a comunicação com a API do Google Sheets.
   - `drive.js`: Módulo responsável por fazer o upload de imagens para o Google Drive.
   - `prints/`: Pasta anteriormente usada para salvar imagens localmente, agora substituída pela integração com Google Drive.
+
+-----
+
+## ✅ Melhorias e Correções
+
+  - **Correção de Fluxo de Imagem:** Resolvido o problema que interrompia o fluxo de conversa após o envio de uma imagem pelo usuário.
+  - **Ajuste no Mapeamento de Dados:** Corrigida a lógica de mapeamento de respostas para o Google Sheets, garantindo que a descrição do problema e a URL da imagem sejam salvas nas colunas corretas.
+  - **Validação Aprimorada de E-mail Institucional:** Implementada uma validação mais específica para e-mails institucionais, garantindo que o domínio `@edum.rn.senac.br` seja seguido e fornecendo feedback claro ao usuário em caso de formato incorreto.
 
 -----
 
