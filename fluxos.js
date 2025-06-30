@@ -12,6 +12,7 @@ const fluxos = {
         { pergunta: 'Agora informe seu CPF (somente números):', valida: valCPF },
         { pergunta: 'Por favor, informe seu email pessoal:', valida: valEmail },
         { pergunta: 'Agora informe seu email institucional:', valida: valEmail },
+        { pergunta: 'Descreva brevemente o seu problema (Em uma única mensagem!):', valida: valTextoSimples }, // Novo passo aqui!
         { pergunta: 'Por favor, envie uma foto ou print do erro (imagem):', valida: valImagem }
     ],
     '2': [
@@ -19,6 +20,7 @@ const fluxos = {
         { pergunta: 'Agora informe seu CPF (somente números):', valida: valCPF },
         { pergunta: 'Por favor, informe seu email pessoal:', valida: valEmail },
         { pergunta: 'Agora informe seu email institucional:', valida: valEmail },
+        { pergunta: 'Descreva brevemente o seu problema (Em uma única mensagem!):', valida: valTextoSimples }, // Novo passo aqui!
         { pergunta: 'Por favor, envie uma foto ou print do erro (imagem):', valida: valImagem }
     ],
     '4': [
