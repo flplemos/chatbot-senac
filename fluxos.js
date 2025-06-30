@@ -3,7 +3,8 @@ const {
     valCPF,
     valEmail,
     valTextoSimples,
-    valImagem
+    valImagem,
+    valEmailInstitucional
 } = require('./validacoes');
 
 const fluxos = {
@@ -11,7 +12,7 @@ const fluxos = {
         { pergunta: 'Por favor, informe seu nome completo:', valida: valNome },
         { pergunta: 'Agora informe seu CPF (somente números):', valida: valCPF },
         { pergunta: 'Por favor, informe seu email pessoal:', valida: valEmail },
-        { pergunta: 'Agora informe seu email institucional:', valida: valEmail },
+        { pergunta: 'Agora informe seu email institucional (o e-mail institucional é aquele que termina com @edum.rn.senac.br):', valida: valEmailInstitucional },
         { pergunta: 'Descreva brevemente o seu problema (Em uma única mensagem!):', valida: valTextoSimples }, // Novo passo aqui!
         { pergunta: 'Por favor, envie uma foto ou print do erro (imagem):', valida: valImagem }
     ],
@@ -19,7 +20,7 @@ const fluxos = {
         { pergunta: 'Informe seu nome completo:', valida: valNome },
         { pergunta: 'Agora informe seu CPF (somente números):', valida: valCPF },
         { pergunta: 'Por favor, informe seu email pessoal:', valida: valEmail },
-        { pergunta: 'Agora informe seu email institucional:', valida: valEmail },
+        { pergunta: 'Agora informe seu email institucional (o e-mail institucional é aquele que termina com @edum.rn.senac.br):', valida: valEmailInstitucional },
         { pergunta: 'Descreva brevemente o seu problema (Em uma única mensagem!):', valida: valTextoSimples }, // Novo passo aqui!
         { pergunta: 'Por favor, envie uma foto ou print do erro (imagem):', valida: valImagem }
     ],
