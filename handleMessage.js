@@ -7,7 +7,7 @@ const { valImagem } = require("./validacoes");
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE; 
+const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE;
 
 function dentroDoHorario() {
   const agora = new Date();
@@ -18,17 +18,18 @@ function dentroDoHorario() {
   return diaUtil && horarioUtil;
 }
 
-function getAtendenteDaVez() {
+// MODIFICAÇÃO AQUI: Renomeada e alterada para retornar um array de atendentes
+function getAtendentesDaVez() {
   const agora = new Date();
   const diaAtual = agora.getDay();
   const horaAtual = agora.getHours();
-  const plantonista = agenda.find(
+  const plantonistasAtivos = agenda.filter(
     (turno) =>
       turno.dia === diaAtual &&
       horaAtual >= turno.horaInicio &&
       horaAtual < turno.horaFim
   );
-  return plantonista;
+  return plantonistasAtivos; // Retorna um array de objetos de atendente
 }
 
 async function handleMessage(msg, client, usersData, chatsCongelados) {
@@ -106,10 +107,10 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     //  Verifica se o fluxo já terminou ANTES de tentar validar.
     // =================================================================
     if (passoAtual >= passos.length) {
-        // Se por algum motivo a função for chamada para um passo que não existe,
-        // apenas limpa o estado do usuário e encerra.
-        delete usersData[chatId];
-        return;
+      // Se por algum motivo a função for chamada para um passo que não existe,
+      // apenas limpa o estado do usuário e encerra.
+      delete usersData[chatId];
+      return;
     }
 
     let valido = false;
@@ -118,7 +119,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     } else {
       valido = passos[passoAtual].valida(msg.body || "");
     }
-    
+
     if (!valido) {
       await client.sendMessage(
         chatId,
@@ -162,22 +163,21 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     const name = contact.pushname || "Usuário";
     await client.sendMessage(
       msg.from,
-      `Olá! ${
-        name.split(" ")[0]
+      `Olá! ${name.split(" ")[0]
       } Sou o assistente virtual do Senac-RN EduTech! Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
-        `1 - Recuperação de acesso a conta Microsoft\n` +
-        `2 - Problemas com Microsoft Authenticator\n` +
-        `3 - Consultar meu e-mail institucional\n` +
-        `4 - Problema no portal do aluno\n` +
-        `5 - Dúvidas sobre cursos e matrículas\n` +
-        `6 - Falar com o suporte humano\n`
+      `1 - Recuperação de acesso a conta Microsoft\n` +
+      `2 - Problemas com Microsoft Authenticator\n` +
+      `3 - Consultar meu e-mail institucional\n` +
+      `4 - Problema no portal do aluno\n` +
+      `5 - Dúvidas sobre cursos e matrículas\n` +
+      `6 - Falar com o suporte humano\n`
     );
     await chat.sendStateTyping();
     await delay(3000);
     await client.sendMessage(
       msg.from,
       `Após o envio da mensagem, aguarde. Não reenvie mensagens ou realize ligações, pois alteram a sua vez na fila de espera.\n` +
-        `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
+      `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
     );
     return;
   }
@@ -211,40 +211,52 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
 
     if (opcao === "6") {
       if (dentroDoHorario()) {
-        const atendente = getAtendenteDaVez();
-        if (atendente) {
+        const atendentesAtivos = getAtendentesDaVez(); // Busca todos os atendentes ativos
+
+        // AQUI: A condição deve verificar se há atendentes ativos no array
+        if (atendentesAtivos.length > 0) {
           const contatoUsuario = await msg.getContact();
           const nomeUsuario = contatoUsuario.pushname || msg.from;
           const numeroUsuario = msg.from.replace("@c.us", "");
+
+          // AQUI: Declarando 'mentions' e 'nomesAtendentes' antes de usá-los
+          const mentions = atendentesAtivos.map(a => a.id); // Constrói array de IDs para menção
+          const nomesAtendentes = atendentesAtivos.map(a => `*${a.atendente}* (@${a.id.replace("@c.us", "")})`).join(' e '); // Constrói string de nomes
 
           const msgParaGrupo =
             `*Novo chamado para atendimento humano!*\n\n` +
             `*Solicitante:* ${nomeUsuario}\n` +
             `*Contato:* ${numeroUsuario}\n\n` +
-            `Atenção, @${atendente.id.replace(
-              "@c.us",
-              ""
-            )}! Por favor, assuma o atendimento.\n\n` +
+            `Atenção, ${nomesAtendentes}! Por favor, assumam o atendimento.\n\n` +
             `*‼️ Bot nesta conversa está congelado.*\n\n` +
             `🧊 Para liberar depois, envie: *!liberarbot ${numeroUsuario}*`;
 
           await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
-            mentions: [atendente.id],
+            mentions: mentions, // Passa o array de IDs para menção
           });
 
           chatsCongelados.add(chatId);
 
+          // Personaliza a resposta ao usuário com base no número de atendentes
+          let responseToUser = `Certo! Notifiquei `;
+          if (atendentesAtivos.length === 1) {
+            responseToUser += `o(a) atendente *${atendentesAtivos[0].atendente}*`;
+          } else {
+            responseToUser += `os(as) atendentes ${atendentesAtivos.map(a => `*${a.atendente}*`).join(' e ')}`;
+          }
+          responseToUser += ` e ele(s) já está(ão) ciente(s) da sua solicitação. Em breve, ele(s) responderá(ão) aqui mesmo nesta conversa.`;
+
           await client.sendMessage(
             chatId,
-            `Certo! Notifiquei o(a) atendente *${atendente.atendente}* e ele(a) já está ciente da sua solicitação. Em breve, ele(a) responderá aqui mesmo nesta conversa.`
+            responseToUser
           );
-        } else {
+        } else { // Caso não encontre nenhum atendente no horário
           await client.sendMessage(
             chatId,
             "Estamos em horário de atendimento, mas não encontrei um atendente de plantão na agenda. Por favor, aguarde que logo alguém da equipe irá lhe responder."
           );
         }
-      } else {
+      } else { // Caso esteja fora do horário de atendimento
         await client.sendMessage(
           chatId,
           "Nosso atendimento humano funciona de segunda a sexta-feira, das 08:00 às 21:00. Por favor, entre em contato nesse período."
