@@ -25,6 +25,7 @@ Oferecer um atendimento automatizado inicial para suporte técnico, com foco em:
   - **Formatação Avançada da Planilha:** Utiliza Google Apps Script para formatar a planilha de chamados automaticamente, incluindo cabeçalhos estilizados, cores de linha alternadas e botões de status interativos e coloridos.
   - **Gestão de Atendimento Humano:** Possui agenda de plantão para direcionar o usuário ao atendente correto e permite "congelar" a automação para que um humano possa assumir a conversa.
   - **Coleta Detalhada de Descrição do Problema:** Permite que os usuários forneçam uma descrição textual detalhada do problema em fluxos específicos (Opções 1 e 2), aprimorando a triagem e o atendimento do suporte humano.
+  - **Notificação Multi-Atendente:** Aprimorado para notificar e mencionar todos os atendentes que estão de plantão durante um período de sobreposição de turnos, garantindo que nenhum chamado seja perdido.
 
 -----
 
