@@ -170,7 +170,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       `3 - Consultar meu e-mail institucional\n` +
       `4 - Problema no portal do aluno\n` +
       `5 - Dúvidas sobre cursos e matrículas\n` +
-      `6 - Falar com o suporte humano\n`
+      `6 - Outros\n`
     );
     await chat.sendStateTyping();
     await delay(3000);
