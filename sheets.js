@@ -30,21 +30,39 @@ async function lerStatusChamados() {
 
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: 'cabecalhos_chamados!A1:Z1000', // Ajuste se sua aba for diferente
+    range: 'cabecalhos_chamados!A1:Z1000',
   });
 
   const rows = response.data.values;
   if (!rows || rows.length < 2) return [];
 
   const headers = rows[0];
-  const numeroIndex = headers.findIndex(h => h.toLowerCase().includes('número'));
+
+  const chatIDHeader = headers[1]; 
+  if (chatIDHeader) {
+      const lowerCaseHeader = chatIDHeader.toLowerCase();
+      const includesChatID = lowerCaseHeader.includes('chat id');
+      const includesIDUsuario = lowerCaseHeader.includes('id do usuário');
+  }
+  
+
+  const chatIdIndex = headers.findIndex(h => h.toLowerCase().includes('chat id') || h.toLowerCase().includes('id do usuário'));
   const statusIndex = headers.findIndex(h => h.toLowerCase().includes('status'));
+
+  if (chatIdIndex === -1) {
+    console.warn("Aviso: Coluna 'ID do Chat' ou 'ID do Usuário' não encontrada no Google Sheet. Verifique os cabeçalhos.");
+    return [];
+  }
+  if (statusIndex === -1) {
+    console.warn("Aviso: Coluna 'Status' não encontrada no Google Sheet. Verifique os cabeçalhos.");
+    return [];
+  }
 
   const chamados = [];
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    const numero = row[numeroIndex];
+    const numero = row[chatIdIndex];
     const status = row[statusIndex];
     if (numero && status) {
       chamados.push({ numero, status: status.toLowerCase() });

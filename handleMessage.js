@@ -32,16 +32,23 @@ function getAtendentesDaVez() {
   return plantonistasAtivos; // Retorna um array de objetos de atendente
 }
 
-async function handleMessage(msg, client, usersData, chatsCongelados) {
+async function handleMessage(
+  msg,
+  client,
+  usersData,
+  chatsCongelados,
+  usuariosAtendimentoHumanoLocal
+) {
   const chatId = msg.from;
 
-  // --- ADIÇÃO AQUI: Ignorar mensagens de grupos que não são o de suporte ---
-  const chat = await msg.getChat(); // Obtém informações do chat
+  // Buscando informações de chat e contato UMA única vez
+  const chat = await msg.getChat();
+  const contact = await msg.getContact();
+
+  // --- Ignorar mensagens de grupos que não são o de suporte ---
   if (chat.isGroup && chatId !== ID_GRUPO_SUPORTE) {
-    // Se for um grupo E não for o grupo de suporte, ignore a mensagem e retorne.
     return;
   }
-  // --- FIM DA ADIÇÃO ---
 
   if (msg.from === ID_GRUPO_SUPORTE) {
     if (msg.body.toLowerCase().startsWith("!liberarbot ")) {
@@ -56,8 +63,12 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       }
       const chatIdAlvo = `${numeroAlvo}@c.us`;
 
-      if (chatsCongelados.has(chatIdAlvo)) {
+      if (
+        chatsCongelados.has(chatIdAlvo) ||
+        usuariosAtendimentoHumanoLocal.has(chatIdAlvo)
+      ) {
         chatsCongelados.delete(chatIdAlvo);
+        usuariosAtendimentoHumanoLocal.delete(chatIdAlvo);
         await client.sendMessage(
           ID_GRUPO_SUPORTE,
           `✅ Bot liberado para o usuário ${numeroAlvo}.`
@@ -98,10 +109,36 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       return;
     }
 
+    if (msg.body.toLowerCase().startsWith("!listarcongelados")) {
+      const listaPlanilha = Array.from(chatsCongelados).map(
+        (id) => `🔹 ${id.replace("@c.us", "")}`
+      );
+      const listaLocal = Array.from(usuariosAtendimentoHumanoLocal).map(
+        (id) => `🟢 ${id.replace("@c.us", "")}`
+      );
+
+      const resposta =
+        `📌 *Usuários congelados (Planilha + Opção 6)*\n\n` +
+        `🔷 *Planilha:* ${
+          listaPlanilha.length > 0 ? listaPlanilha.join("\n") : "Nenhum"
+        }\n\n` +
+        `🟢 *Opção 6 (local):* ${
+          listaLocal.length > 0 ? listaLocal.join("\n") : "Nenhum"
+        }`;
+
+      await client.sendMessage(ID_GRUPO_SUPORTE, resposta);
+      return;
+    }
+
     return;
   }
 
   if (chatsCongelados.has(chatId)) {
+    // Mensagem opcional avisando que bot está congelado
+    // await client.sendMessage(
+    //   chatId,
+    //   "🤖 O bot está congelado pois você está em atendimento humano. Por favor, aguarde o retorno da equipe."
+    // );
     return;
   }
 
@@ -110,20 +147,20 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     const passos = fluxos[user.opcao];
     const passoAtual = user.step;
 
-    // =================================================================
-    // CORREÇÃO: Verifica se o fluxo já terminou ANTES de tentar validar.
-    // =================================================================
     if (passoAtual >= passos.length) {
       delete usersData[chatId];
       return;
     }
 
     let valido = false;
-    // Verifica se é o último passo de imagem nas opções 1, 2 ou 4
-    if ((user.opcao === "1" || user.opcao === "2" || user.opcao === "4") && passoAtual === fluxos[user.opcao].length - 1) {
-      valido = valImagem(msg); // Valida se é uma mensagem de mídia
+
+    if (
+      (user.opcao === "1" || user.opcao === "2" || user.opcao === "4") &&
+      passoAtual === fluxos[user.opcao].length - 1
+    ) {
+      valido = valImagem(msg);
     } else {
-      valido = passos[passoAtual].valida(msg.body || ""); // Validação de texto
+      valido = passos[passoAtual].valida(msg.body || "");
     }
 
     if (!valido) {
@@ -134,14 +171,16 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       return;
     }
 
-    // Se for o passo de imagem, processa o download e o upload da imagem
-    if ((user.opcao === "1" || user.opcao === "2" || user.opcao === "4") && passoAtual === fluxos[user.opcao].length - 1) {
+    if (
+      (user.opcao === "1" || user.opcao === "2" || user.opcao === "4") &&
+      passoAtual === fluxos[user.opcao].length - 1
+    ) {
       const media = await msg.downloadMedia();
       const fileName = `${chatId}_${Date.now()}.jpeg`;
       const imageUrl = await uploadImagem(media.data, media.mimetype, fileName);
-      user.respostas[passoAtual] = imageUrl; // Salva a URL da imagem
+      user.respostas[passoAtual] = imageUrl;
     } else {
-      user.respostas[passoAtual] = msg.body.trim(); // Para outros passos, salva o texto
+      user.respostas[passoAtual] = msg.body.trim();
     }
 
     user.step++;
@@ -162,28 +201,28 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     msg.body.match(/(menu|Menu|oi|Oi|Olá|olá|boa|Boa)/i) &&
     msg.from.endsWith("@c.us")
   ) {
-    const chat = await msg.getChat();
     await delay(3000);
     await chat.sendStateTyping();
     await delay(3000);
-    const contact = await msg.getContact();
+
     const name = contact.pushname || "Usuário";
+
     await client.sendMessage(
       msg.from,
       `Olá! ${name.split(" ")[0]} Sou o assistente virtual do Senac-RN EduTech! Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
-      `1 - Recuperação de acesso a conta Microsoft\n` +
-      `2 - Problemas com Microsoft Authenticator\n` +
-      `3 - Consultar meu e-mail institucional\n` +
-      `4 - Problema no portal do aluno\n` +
-      `5 - Dúvidas sobre cursos e matrículas\n` +
-      `6 - Outros\n`
+        `1 - Recuperação de acesso a conta Microsoft\n` +
+        `2 - Problemas com Microsoft Authenticator\n` +
+        `3 - Consultar meu e-mail institucional\n` +
+        `4 - Problema no portal do aluno\n` +
+        `5 - Dúvidas sobre cursos e matrículas\n` +
+        `6 - Outros\n`
     );
     await chat.sendStateTyping();
     await delay(3000);
     await client.sendMessage(
       msg.from,
       `Após o envio da mensagem, aguarde. Não reenvie mensagens ou realize ligações, pois alteram a sua vez na fila de espera.\n` +
-      `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
+        `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
     );
     return;
   }
@@ -208,24 +247,22 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
         );
       }
       await delay(3000);
-      await client.sendMessage(
-        msg.from,
-        'Para retornar ao Menu digite: "menu"'
-      );
+      await client.sendMessage(msg.from, 'Para retornar ao Menu digite: "menu"');
       return;
     }
 
     if (opcao === "6") {
       if (dentroDoHorario()) {
-        const atendentesAtivos = getAtendentesDaVez(); // Busca todos os atendentes ativos
+        const atendentesAtivos = getAtendentesDaVez();
 
         if (atendentesAtivos.length > 0) {
-          const contatoUsuario = await msg.getContact();
-          const nomeUsuario = contatoUsuario.pushname || msg.from;
+          const nomeUsuario = contact.pushname || msg.from;
           const numeroUsuario = msg.from.replace("@c.us", "");
 
-          const mentions = atendentesAtivos.map(a => a.id); // Constrói array de IDs para menção
-          const nomesAtendentes = atendentesAtivos.map(a => `*${a.atendente}* (@${a.id.replace("@c.us", "")})`).join(' e ');
+          const mentions = atendentesAtivos.map((a) => a.id);
+          const nomesAtendentes = atendentesAtivos
+            .map((a) => `*${a.atendente}* (@${a.id.replace("@c.us", "")})`)
+            .join(" e ");
 
           const msgParaGrupo =
             `*Novo chamado para atendimento humano!*\n\n` +
@@ -236,23 +273,24 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
             `🧊 Para liberar depois, envie: *!liberarbot ${numeroUsuario}*`;
 
           await client.sendMessage(ID_GRUPO_SUPORTE, msgParaGrupo, {
-            mentions: mentions, // Passa o array de IDs para menção
+            mentions: mentions,
           });
 
-          chatsCongelados.add(chatId);
+          usuariosAtendimentoHumanoLocal.add(chatId);
+          chatsCongelados.add(chatId); // CONGELA IMEDIATAMENTE o bot para o usuário
 
           let responseToUser = `Certo! Notifiquei `;
           if (atendentesAtivos.length === 1) {
             responseToUser += `o(a) atendente *${atendentesAtivos[0].atendente}*`;
           } else {
-            responseToUser += `os(as) atendentes ${atendentesAtivos.map(a => `*${a.atendente}*`).join(' e ')}`;
+            responseToUser += `os(as) atendentes ${atendentesAtivos
+              .map((a) => `*${a.atendente}*`)
+              .join(" e ")}`;
           }
-          responseToUser += ` e ele(s) já está(ão) ciente(s) da sua solicitação. Em breve, ele(s) responderá(ão) aqui mesmo nesta conversa.`;
+          responseToUser +=
+            ` e ele(s) já está(ão) ciente(s) da sua solicitação. Em breve, ele(s) responderá(ão) aqui mesmo nesta conversa.`;
 
-          await client.sendMessage(
-            chatId,
-            responseToUser
-          );
+          await client.sendMessage(chatId, responseToUser);
         } else {
           await client.sendMessage(
             chatId,
