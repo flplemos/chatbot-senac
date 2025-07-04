@@ -35,6 +35,14 @@ function getAtendentesDaVez() {
 async function handleMessage(msg, client, usersData, chatsCongelados) {
   const chatId = msg.from;
 
+  // --- ADIÇÃO AQUI: Ignorar mensagens de grupos que não são o de suporte ---
+  const chat = await msg.getChat(); // Obtém informações do chat
+  if (chat.isGroup && chatId !== ID_GRUPO_SUPORTE) {
+    // Se for um grupo E não for o grupo de suporte, ignore a mensagem e retorne.
+    return;
+  }
+  // --- FIM DA ADIÇÃO ---
+
   if (msg.from === ID_GRUPO_SUPORTE) {
     if (msg.body.toLowerCase().startsWith("!liberarbot ")) {
       const partes = msg.body.split(" ");
