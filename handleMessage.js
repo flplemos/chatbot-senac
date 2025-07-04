@@ -18,7 +18,7 @@ function dentroDoHorario() {
   return diaUtil && horarioUtil;
 }
 
-// MODIFICAÇÃO AQUI: Renomeada e alterada para retornar um array de atendentes
+// Função para buscar atendentes ativos no momento
 function getAtendentesDaVez() {
   const agora = new Date();
   const diaAtual = agora.getDay();
@@ -103,21 +103,19 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     const passoAtual = user.step;
 
     // =================================================================
-    //  CORREÇÃO APLICADA AQUI
-    //  Verifica se o fluxo já terminou ANTES de tentar validar.
+    // CORREÇÃO: Verifica se o fluxo já terminou ANTES de tentar validar.
     // =================================================================
     if (passoAtual >= passos.length) {
-      // Se por algum motivo a função for chamada para um passo que não existe,
-      // apenas limpa o estado do usuário e encerra.
       delete usersData[chatId];
       return;
     }
 
     let valido = false;
-    if ((user.opcao === "1" || user.opcao === "2") && passoAtual === 4) {
-      valido = valImagem(msg);
+    // Verifica se é o último passo de imagem nas opções 1, 2 ou 4
+    if ((user.opcao === "1" || user.opcao === "2" || user.opcao === "4") && passoAtual === fluxos[user.opcao].length - 1) {
+      valido = valImagem(msg); // Valida se é uma mensagem de mídia
     } else {
-      valido = passos[passoAtual].valida(msg.body || "");
+      valido = passos[passoAtual].valida(msg.body || ""); // Validação de texto
     }
 
     if (!valido) {
@@ -128,13 +126,14 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       return;
     }
 
-    if ((user.opcao === "1" || user.opcao === "2") && passoAtual === 4) {
+    // Se for o passo de imagem, processa o download e o upload da imagem
+    if ((user.opcao === "1" || user.opcao === "2" || user.opcao === "4") && passoAtual === fluxos[user.opcao].length - 1) {
       const media = await msg.downloadMedia();
       const fileName = `${chatId}_${Date.now()}.jpeg`;
       const imageUrl = await uploadImagem(media.data, media.mimetype, fileName);
-      user.respostas[passoAtual] = imageUrl;
+      user.respostas[passoAtual] = imageUrl; // Salva a URL da imagem
     } else {
-      user.respostas[passoAtual] = msg.body.trim();
+      user.respostas[passoAtual] = msg.body.trim(); // Para outros passos, salva o texto
     }
 
     user.step++;
@@ -163,8 +162,7 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
     const name = contact.pushname || "Usuário";
     await client.sendMessage(
       msg.from,
-      `Olá! ${name.split(" ")[0]
-      } Sou o assistente virtual do Senac-RN EduTech! Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
+      `Olá! ${name.split(" ")[0]} Sou o assistente virtual do Senac-RN EduTech! Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
       `1 - Recuperação de acesso a conta Microsoft\n` +
       `2 - Problemas com Microsoft Authenticator\n` +
       `3 - Consultar meu e-mail institucional\n` +
@@ -213,15 +211,13 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
       if (dentroDoHorario()) {
         const atendentesAtivos = getAtendentesDaVez(); // Busca todos os atendentes ativos
 
-        // AQUI: A condição deve verificar se há atendentes ativos no array
         if (atendentesAtivos.length > 0) {
           const contatoUsuario = await msg.getContact();
           const nomeUsuario = contatoUsuario.pushname || msg.from;
           const numeroUsuario = msg.from.replace("@c.us", "");
 
-          // AQUI: Declarando 'mentions' e 'nomesAtendentes' antes de usá-los
           const mentions = atendentesAtivos.map(a => a.id); // Constrói array de IDs para menção
-          const nomesAtendentes = atendentesAtivos.map(a => `*${a.atendente}* (@${a.id.replace("@c.us", "")})`).join(' e '); // Constrói string de nomes
+          const nomesAtendentes = atendentesAtivos.map(a => `*${a.atendente}* (@${a.id.replace("@c.us", "")})`).join(' e ');
 
           const msgParaGrupo =
             `*Novo chamado para atendimento humano!*\n\n` +
@@ -237,7 +233,6 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
 
           chatsCongelados.add(chatId);
 
-          // Personaliza a resposta ao usuário com base no número de atendentes
           let responseToUser = `Certo! Notifiquei `;
           if (atendentesAtivos.length === 1) {
             responseToUser += `o(a) atendente *${atendentesAtivos[0].atendente}*`;
@@ -250,13 +245,13 @@ async function handleMessage(msg, client, usersData, chatsCongelados) {
             chatId,
             responseToUser
           );
-        } else { // Caso não encontre nenhum atendente no horário
+        } else {
           await client.sendMessage(
             chatId,
             "Estamos em horário de atendimento, mas não encontrei um atendente de plantão na agenda. Por favor, aguarde que logo alguém da equipe irá lhe responder."
           );
         }
-      } else { // Caso esteja fora do horário de atendimento
+      } else {
         await client.sendMessage(
           chatId,
           "Nosso atendimento humano funciona de segunda a sexta-feira, das 08:00 às 21:00. Por favor, entre em contato nesse período."
