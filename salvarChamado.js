@@ -3,6 +3,14 @@ const { MongoClient } = require('mongodb');
 const { adicionarLinha } = require('./sheets');
 const ID_GRUPO_SUPORTE = process.env.ID_GRUPO_SUPORTE;
 
+function getDataHoraBrasilia() {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Recife', // ou 'America/Fortaleza' se preferir
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(new Date());
+}
+
 // 2. Configurações do Banco de Dados (use as variáveis de ambiente!)
 const MONGO_URI = process.env.MONGO_URI; // Sua string de conexão do Atlas virá daqui
 const DB_NAME = 'chatbot_senac_db';      // Nome do seu banco de dados
@@ -15,7 +23,8 @@ async function salvarChamado(opcao, respostas, chatId, client) {
     opcao: opcao,
     respostas: respostas,
     chatId: chatId,
-    dataRegistro: new Date(),
+    dataRegistro: new Date(),                // formato UTC (ótimo para queries)
+    dataLocal: getDataHoraBrasilia(),        // formato BR (ótimo para humanos)
     status: 'Em aberto' // Adicionando um status inicial
   };
 
@@ -33,7 +42,7 @@ async function salvarChamado(opcao, respostas, chatId, client) {
       '',                 // Coluna F: Email Institucional (Vazio, pois não é coletado neste fluxo)
       respostas[3] || '', // Coluna G: Descrição do Problema
       respostas[4]?.startsWith('http') ? respostas[4] : '', // Coluna H: Print/Foto Erro
-      new Date().toLocaleString('pt-BR'),
+      getDataHoraBrasilia(),
       'Em aberto',
       '', '', '', ''
     ];
@@ -48,7 +57,7 @@ async function salvarChamado(opcao, respostas, chatId, client) {
       respostas[3] || '', // Email Institucional
       respostas[4] || '', // Descrição do Problema
       respostas[5]?.startsWith('http') ? respostas[5] : '', // URL da Imagem (se for uma URL)
-      new Date().toLocaleString('pt-BR'),
+      getDataHoraBrasilia(),
       'Em aberto',
       '', '', '', ''
     ];
@@ -62,6 +71,19 @@ async function salvarChamado(opcao, respostas, chatId, client) {
     await mongoClient.connect(); // Conecta ao servidor
     const db = mongoClient.db(DB_NAME); // Seleciona o banco de dados
     const collection = db.collection(COLLECTION_NAME); // Seleciona a coleção
+
+    // Verifica se já existe um chamado em aberto para este chatId
+    const chamadoExistente = await collection.findOne({
+      chatId: chatId,
+      status: 'Em aberto'
+    });
+
+    if (chamadoExistente) {
+      await client.sendMessage(chatId, '⚠️ Já existe um chamado em aberto para seu número. Por favor, aguarde o atendimento antes de registrar outro.');
+      console.log(`Chamado duplicado evitado para ${chatId}`);
+      return; // Não prossegue com o novo registro
+    }
+
     await collection.insertOne(chamado); // Insere o documento do chamado
     console.log('Chamado registrado no MongoDB com sucesso!');
 

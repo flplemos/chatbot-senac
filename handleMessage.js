@@ -119,11 +119,9 @@ async function handleMessage(
 
       const resposta =
         `📌 *Usuários congelados (Planilha + Opção 6)*\n\n` +
-        `🔷 *Planilha:* ${
-          listaPlanilha.length > 0 ? listaPlanilha.join("\n") : "Nenhum"
+        `🔷 *Planilha:* ${listaPlanilha.length > 0 ? listaPlanilha.join("\n") : "Nenhum"
         }\n\n` +
-        `🟢 *Opção 6 (local):* ${
-          listaLocal.length > 0 ? listaLocal.join("\n") : "Nenhum"
+        `🟢 *Opção 6 (local):* ${listaLocal.length > 0 ? listaLocal.join("\n") : "Nenhum"
         }`;
 
       await client.sendMessage(ID_GRUPO_SUPORTE, resposta);
@@ -175,9 +173,26 @@ async function handleMessage(
       (user.opcao === "1" || user.opcao === "2" || user.opcao === "4") &&
       passoAtual === fluxos[user.opcao].length - 1
     ) {
+
       const media = await msg.downloadMedia();
+
+      const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg'];
+
+      if (!tiposPermitidos.includes(media.mimetype)) {
+        await client.sendMessage(chatId, '❌ O tipo de arquivo enviado não é uma imagem válida. Envie uma imagem nos formatos JPEG ou PNG.');
+        return;
+      }
+
       const fileName = `${chatId}_${Date.now()}.jpeg`;
       const imageUrl = await uploadImagem(media.data, media.mimetype, fileName);
+
+      const isValidUrl = imageUrl && imageUrl.startsWith('http');
+
+      if (!isValidUrl) {
+        await client.sendMessage(chatId, '❌ Erro ao enviar a imagem. Tente novamente ou envie outra imagem válida.');
+        return; // Encerra aqui, usuário precisa reenviar
+      }
+
       user.respostas[passoAtual] = imageUrl;
     } else {
       user.respostas[passoAtual] = msg.body.trim();
@@ -210,19 +225,19 @@ async function handleMessage(
     await client.sendMessage(
       msg.from,
       `Olá! ${name.split(" ")[0]} Sou o assistente virtual do Senac-RN EduTech! Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
-        `1 - Recuperação de acesso a conta Microsoft\n` +
-        `2 - Problemas com Microsoft Authenticator\n` +
-        `3 - Consultar meu e-mail institucional\n` +
-        `4 - Problema no portal do aluno\n` +
-        `5 - Dúvidas sobre cursos e matrículas\n` +
-        `6 - Outros\n`
+      `1 - Recuperação de acesso a conta Microsoft ou Microsoft Teams\n` +
+      `2 - Problemas com Microsoft Authenticator\n` +
+      `3 - Consultar meu e-mail institucional\n` +
+      `4 - Problema no portal do aluno\n` +
+      `5 - Dúvidas sobre cursos e matrículas\n` +
+      `6 - Outros\n`
     );
     await chat.sendStateTyping();
     await delay(3000);
     await client.sendMessage(
       msg.from,
       `Após o envio da mensagem, aguarde. Não reenvie mensagens ou realize ligações, pois alteram a sua vez na fila de espera.\n` +
-        `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
+      `Informamos que o Senac-RN preserva seus dados pessoais de forma segura e transparente, baseado na nova Lei n°13.709/2018 LGPD (Lei Geral de Proteção de Dados).`
     );
     return;
   }

@@ -1,4 +1,6 @@
 require("dotenv").config();
+const validarEnv = require('./envValidator');
+validarEnv();
 const qrcode = require("qrcode-terminal");
 const { Client } = require("whatsapp-web.js");
 const handleMessage = require("./handleMessage");

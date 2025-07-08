@@ -38,14 +38,6 @@ async function lerStatusChamados() {
 
   const headers = rows[0];
 
-  const chatIDHeader = headers[1]; 
-  if (chatIDHeader) {
-      const lowerCaseHeader = chatIDHeader.toLowerCase();
-      const includesChatID = lowerCaseHeader.includes('chat id');
-      const includesIDUsuario = lowerCaseHeader.includes('id do usuário');
-  }
-  
-
   const chatIdIndex = headers.findIndex(h => h.toLowerCase().includes('chat id') || h.toLowerCase().includes('id do usuário'));
   const statusIndex = headers.findIndex(h => h.toLowerCase().includes('status'));
 
