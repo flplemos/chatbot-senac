@@ -36,8 +36,8 @@ async function handleMessage(
   msg,
   client,
   usersData,
-  chatsCongelados,
-  usuariosAtendimentoHumanoLocal
+  chatsCongelados,             // Lista Mestra de chats congelados (inclui planilha e locais)
+  usuariosAtendimentoHumanoLocal // Lista APENAS de chats congelados localmente (persistente)
 ) {
   const chatId = msg.from;
 
@@ -63,19 +63,20 @@ async function handleMessage(
       }
       const chatIdAlvo = `${numeroAlvo}@c.us`;
 
-      if (
-        chatsCongelados.has(chatIdAlvo) ||
-        usuariosAtendimentoHumanoLocal.has(chatIdAlvo)
-      ) {
-        chatsCongelados.delete(chatIdAlvo);
-        usuariosAtendimentoHumanoLocal.delete(chatIdAlvo);
+      // Remove do set de congelamento LOCAL
+      if (usuariosAtendimentoHumanoLocal.has(chatIdAlvo)) {
+        usuariosAtendimentoHumanoLocal.delete(chatIdAlvo); // Remove do congelamento LOCAL
         await client.sendMessage(
           ID_GRUPO_SUPORTE,
           `✅ Bot liberado para o usuário ${numeroAlvo}.`
         );
-      } else {
-        console.log(`Falha ao liberar. ID buscado: ${chatIdAlvo}`);
-        console.log("IDs congelados no momento:", Array.from(chatsCongelados));
+      } else if (chatsCongelados.has(chatIdAlvo)) { // Se não estava no local, mas está no mestre (da planilha)
+           await client.sendMessage(
+             ID_GRUPO_SUPORTE,
+             `⚠️ O usuário ${numeroAlvo} está congelado via planilha e não localmente. Por favor, libere-o na planilha do Google Sheets.`
+           );
+      }
+      else {
         await client.sendMessage(
           ID_GRUPO_SUPORTE,
           `⚠️ O bot já estava ativo para o usuário ${numeroAlvo}.`
@@ -94,13 +95,14 @@ async function handleMessage(
       }
       const chatIdAlvo = `${numeroAlvo}@c.us`;
 
-      if (chatsCongelados.has(chatIdAlvo)) {
+      if (usuariosAtendimentoHumanoLocal.has(chatIdAlvo) || chatsCongelados.has(chatIdAlvo)) {
         await client.sendMessage(
           ID_GRUPO_SUPORTE,
           `⚠️ O bot já estava congelado para o usuário ${numeroAlvo}.`
         );
       } else {
-        chatsCongelados.add(chatIdAlvo);
+        usuariosAtendimentoHumanoLocal.add(chatIdAlvo); // <-- ESSA É A CHAVE: Adiciona ao set LOCAL para persistência
+        chatsCongelados.add(chatIdAlvo);                 // Adiciona ao set mestre para congelamento IMEDIATO
         await client.sendMessage(
           ID_GRUPO_SUPORTE,
           `✅ Bot congelado para o usuário ${numeroAlvo}. O bot não responderá mais a este usuário até ser liberado.`
@@ -110,7 +112,7 @@ async function handleMessage(
     }
 
     if (msg.body.toLowerCase().startsWith("!listarcongelados")) {
-      const listaPlanilha = Array.from(chatsCongelados).map(
+      const listaPlanilha = Array.from(chatsCongelados).filter(id => !usuariosAtendimentoHumanoLocal.has(id)).map( // Filtra para não duplicar se estiver no local
         (id) => `🔹 ${id.replace("@c.us", "")}`
       );
       const listaLocal = Array.from(usuariosAtendimentoHumanoLocal).map(
@@ -118,10 +120,10 @@ async function handleMessage(
       );
 
       const resposta =
-        `📌 *Usuários congelados (Planilha + Opção 6)*\n\n` +
+        `📌 *Usuários congelados (Planilha + Opção 6/Manual)*\n\n` +
         `🔷 *Planilha:* ${listaPlanilha.length > 0 ? listaPlanilha.join("\n") : "Nenhum"
         }\n\n` +
-        `🟢 *Opção 6 (local):* ${listaLocal.length > 0 ? listaLocal.join("\n") : "Nenhum"
+        `🟢 *Opção 6 (local/manual):* ${listaLocal.length > 0 ? listaLocal.join("\n") : "Nenhum"
         }`;
 
       await client.sendMessage(ID_GRUPO_SUPORTE, resposta);

@@ -45,11 +45,19 @@ async function atualizarStatusDosChats() {
       }
     });
 
-    // Atualiza apenas os chats congelados pela planilha
-    chatsCongelados.clear();
-    novosChats.forEach((chatId) => chatsCongelados.add(chatId));
+    // Cria um Set temporário com os congelados da planilha
+    const congeladosDaPlanilha = novosChats;
 
-    // NOTA: Não adicionamos os locais aqui para manter separação clara
+    // Limpa o Set principal
+    chatsCongelados.clear();
+
+    // Adiciona congelados da planilha
+    congeladosDaPlanilha.forEach((chatId) => chatsCongelados.add(chatId));
+
+    // Adiciona também os congelados locais (opção 6)
+    usuariosAtendimentoHumanoLocal.forEach((chatId) =>
+      chatsCongelados.add(chatId)
+    );
 
   } catch (err) {
     console.error("Erro ao atualizar status dos chats:", err.message);
