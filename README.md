@@ -125,10 +125,4 @@ Este projeto foi idealizado e desenvolvido por **Felipe Lemos**, responsável po
   - Lógica de resposta automática inteligente e mensagens conforme a LGPD
   - Estruturação de código limpa e preparada para manutenção/escalabilidade futura
 
-**Rafael Moura** contribuiu com:
-  -Estrutura do código
-  -correção de Bugs no armazenamento
-  - A função de verificação de horário útil (`dentroDoHorario`)
-  - Um fluxo adicional de atendimento (opção 6), sem integração com operadores
-
 Projeto desenvolvido no contexto de estágio no setor de Tecnologia Educacional do Senac-RN.
